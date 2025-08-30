@@ -20,10 +20,6 @@ class RestrauntViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericVi
     Endpoints (when registered via a Router):
       - GET    /api/restraunts/           -> list all restaurants
       - POST   /api/restraunts/           -> create a restaurant
-
-    Notes:
-      - No authentication required here (override of project default), so you can try easily.
-      - You can later tighten with IsAuthenticated if desired.
     """
     queryset = Restraunt.objects.all().order_by("name")
     serializer_class = RestrauntSerializer
