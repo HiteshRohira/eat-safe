@@ -69,10 +69,6 @@ const AddInspectionSchema = z.object({
     .min(1, "CAMIS is required")
     .max(10, "CAMIS max length is 10")
     .transform((v) => v.trim()),
-  inspection_date: z
-    .string()
-    .min(1, "Inspection date is required")
-    .regex(dateRegex, "Use format YYYY-MM-DD"),
   inspection_type: z.enum(INSPECTION_TYPES, {
     required_error: "Inspection type is required",
   }),
@@ -113,7 +109,6 @@ function AddInspectionSheet({ open, onOpenChange, presetCamis, onCreated }) {
     mode: "onSubmit",
     defaultValues: {
       restraunt: presetCamis || "",
-      inspection_date: "",
       inspection_type: "",
       action: "",
       score: "",
@@ -138,7 +133,6 @@ function AddInspectionSheet({ open, onOpenChange, presetCamis, onCreated }) {
     // Reset form each time it opens, seeding CAMIS if provided
     form.reset({
       restraunt: presetCamis || "",
-      inspection_date: "",
       inspection_type: "",
       action: "",
       score: "",
@@ -157,6 +151,11 @@ function AddInspectionSheet({ open, onOpenChange, presetCamis, onCreated }) {
         return Boolean(v.code || v.description || v.critical_flag);
       }),
     };
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    cleaned.inspection_date = `${yyyy}-${mm}-${dd}`;
 
     try {
       form.clearErrors();
@@ -229,19 +228,6 @@ function AddInspectionSheet({ open, onOpenChange, presetCamis, onCreated }) {
                             ))}
                           </SelectContent>
                         </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="inspection_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Inspection Date *</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
