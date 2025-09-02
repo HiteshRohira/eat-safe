@@ -36,7 +36,6 @@ function Inspection() {
   const [addOpen, setAddOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [latestInspection, setLatestInspection] = useState(null);
-  const [latestError, setLatestError] = useState("");
   const [searchParams] = useSearchParams();
   const camisFilter =
     searchParams.get("restraunt") || searchParams.get("camis") || "";
@@ -97,7 +96,6 @@ function Inspection() {
     let isMounted = true;
     const fetchLatest = async () => {
       try {
-        setLatestError("");
         const params = { page: 1, page_size: 1, ordering: "-inspection_date" };
         if (camisFilter) params.restraunt = camisFilter;
         const res = await api.get("/api/inspections/", { params });
@@ -113,7 +111,7 @@ function Inspection() {
       } catch (e) {
         if (!isMounted) return;
         setLatestInspection(null);
-        setLatestError(e?.message || "Failed to load latest inspection.");
+        console.error(e?.message || "Failed to load latest inspection.");
       }
     };
     fetchLatest();
