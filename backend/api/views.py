@@ -1,6 +1,9 @@
 from rest_framework import mixins, permissions, generics
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.contrib.auth.models import User
+
 from .models import Restraunt, Inspection, Violation
 from .serializers import (
     RestrauntSerializer,
@@ -15,15 +18,55 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
+class QSearchFilter(SearchFilter):
+    search_param = "q"
+
+
 class RestrauntViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet):
     """
     Endpoints (when registered via a Router):
-      - GET    /api/restraunts/           -> list all restaurants
+      - GET    /api/restraunts/           -> list restaurants (paginated)
       - POST   /api/restraunts/           -> create a restaurant
+
+    Query params:
+      - q=<text>                          -> server-side search across name, cuisine, boro, zip, CAMIS, phone, street, building
+      - page=<n>                          -> page number (default 1)
+      - page_size=<n>                     -> items per page (default 10)
+      - ordering=<field>                  -> e.g., name, -name
+      - boro=<borough>                    -> optional exact filter
+      - zipcode=<zip>                     -> optional exact filter
+      - cuisine=<text>                    -> optional contains filter
     """
-    queryset = Restraunt.objects.all().order_by("name")
     serializer_class = RestrauntSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [QSearchFilter, OrderingFilter]
+    search_fields = ["name", "cuisine", "boro", "zipcode", "camis", "phone", "street", "building"]
+    ordering_fields = ["name", "boro", "cuisine", "zipcode", "camis"]
+
+    def get_queryset(self):
+        qs = Restraunt.objects.all().order_by("name")
+
+        # Optional exact/contains filters
+        boro = self.request.query_params.get("boro")
+        if boro:
+            qs = qs.filter(boro__iexact=boro)
+
+        zipcode = self.request.query_params.get("zipcode")
+        if zipcode:
+            qs = qs.filter(zipcode__iexact=zipcode)
+
+        cuisine = self.request.query_params.get("cuisine")
+        if cuisine:
+            qs = qs.filter(cuisine__icontains=cuisine)
+
+        return qs
 
 
 class InspectionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet):
