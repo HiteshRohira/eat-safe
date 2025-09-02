@@ -17,6 +17,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
+import { Separator } from "@/components/ui/separator";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -42,7 +43,7 @@ function Home() {
           page_size: ITEMS_PER_PAGE,
         };
         const q = search.trim();
-        if (q) params.search = q;
+        if (q) params.q = q;
 
         const res = await api.get("/api/restraunts/", { params });
         if (!isMounted) return;
@@ -177,6 +178,8 @@ function Home() {
                 ))}
               </TableBody>
             </Table>
+
+            <Separator />
 
             {/* Pagination */}
             <div className="p-4">
