@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,9 @@ function Inspection() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchParams] = useSearchParams();
+  const camisFilter =
+    searchParams.get("restraunt") || searchParams.get("camis") || "";
 
   // Fetch inspections with server-side pagination + search
   useEffect(() => {
@@ -44,6 +48,7 @@ function Inspection() {
         };
         const q = search.trim();
         if (q) params.q = q;
+        if (camisFilter) params.restraunt = camisFilter;
 
         const res = await api.get("/api/inspections/", { params });
         if (!isMounted) return;
@@ -77,14 +82,14 @@ function Inspection() {
     return () => {
       isMounted = false;
     };
-  }, [search, currentPage]);
+  }, [search, camisFilter, currentPage]);
 
   const pageCount = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
   // Reset to page 1 on new search
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, camisFilter]);
 
   // Clamp page when pageCount shrinks
   useEffect(() => {
@@ -103,7 +108,8 @@ function Inspection() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">Inspections</h1>
         <p className="text-muted-foreground">
-          Browse the inspections done for the restraunt and view its violations
+          {`Browse inspections. Use search or filter by CAMIS via the URL to view
+            a restaurant's history`}
         </p>
       </div>
 
@@ -146,35 +152,38 @@ function Inspection() {
             <Table className="[&_th]:bg-muted/30 [&_th]:font-semibold">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Boro</TableHead>
-                  <TableHead>Cuisine</TableHead>
-                  <TableHead>ZIP</TableHead>
-                  <TableHead>CAMIS</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Address</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Action</TableHead>
+                  <TableHead>Score</TableHead>
+                  <TableHead>Grade</TableHead>
+                  <TableHead>Grade Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inspections.map((r) => (
-                  <TableRow key={r.camis}>
-                    <TableCell className="font-medium">
-                      {r?.name || "-"}
-                    </TableCell>
-                    <TableCell>{r?.boro || "-"}</TableCell>
-                    <TableCell>{r?.cuisine || "-"}</TableCell>
-                    <TableCell>{r?.zipcode || "-"}</TableCell>
-                    <TableCell className="tabular-nums">
-                      {r?.camis || "-"}
-                    </TableCell>
-                    <TableCell>{r?.phone || "-"}</TableCell>
-                    <TableCell>
-                      {r?.building || r?.street
-                        ? `${r?.building ?? ""} ${r?.street ?? ""}`.trim()
-                        : "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {inspections.map((r) => {
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="tabular-nums">
+                        {r?.inspection_date || "-"}
+                      </TableCell>
+                      <TableCell>{r?.inspection_type || "-"}</TableCell>
+                      <TableCell
+                        className="max-w-[420px] truncate"
+                        title={r?.action || ""}
+                      >
+                        {r?.action || "-"}
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        {Number.isFinite(r?.score) ? r.score : "-"}
+                      </TableCell>
+                      <TableCell>{r?.grade || "-"}</TableCell>
+                      <TableCell className="tabular-nums">
+                        {r?.grade_date || "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
 

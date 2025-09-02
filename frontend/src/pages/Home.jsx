@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ function Home() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const navigate = useNavigate();
 
   // Fetch restaurants with server-side pagination + search
   useEffect(() => {
@@ -158,7 +160,15 @@ function Home() {
               </TableHeader>
               <TableBody>
                 {restaurants.map((r) => (
-                  <TableRow key={r.camis}>
+                  <TableRow
+                    key={r.camis}
+                    className="cursor-pointer hover:bg-muted/40"
+                    onClick={() =>
+                      navigate(
+                        `/inspections?restraunt=${encodeURIComponent(r.camis)}`,
+                      )
+                    }
+                  >
                     <TableCell className="font-medium">
                       {r?.name || "-"}
                     </TableCell>

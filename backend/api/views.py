@@ -39,9 +39,6 @@ class RestrauntViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericVi
       - page=<n>                          -> page number (default 1)
       - page_size=<n>                     -> items per page (default 10)
       - ordering=<field>                  -> e.g., name, -name
-      - boro=<borough>                    -> optional exact filter
-      - zipcode=<zip>                     -> optional exact filter
-      - cuisine=<text>                    -> optional contains filter
     """
     serializer_class = RestrauntSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -53,19 +50,6 @@ class RestrauntViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericVi
     def get_queryset(self):
         qs = Restraunt.objects.all().order_by("name")
 
-        # Optional exact/contains filters
-        boro = self.request.query_params.get("boro")
-        if boro:
-            qs = qs.filter(boro__iexact=boro)
-
-        zipcode = self.request.query_params.get("zipcode")
-        if zipcode:
-            qs = qs.filter(zipcode__iexact=zipcode)
-
-        cuisine = self.request.query_params.get("cuisine")
-        if cuisine:
-            qs = qs.filter(cuisine__icontains=cuisine)
-
         return qs
 
 
@@ -75,6 +59,10 @@ class InspectionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericV
       - GET    /api/inspections/                       -> list inspections
       - POST   /api/inspections/                       -> create an inspection
     Query params:
+      - q=<text>                                       -> server-side search across inspection fields and related restaurant fields
+      - ordering=<field>                               -> e.g., inspection_date, -inspection_date, score, restraunt__name
+      - page=<n>                                       -> page number (default 1)
+      - page_size=<n>                                  -> items per page (default 10)
       - restraunt=<camis> or camis=<camis>             -> filter inspections for a specific restaurant
 
     Create payload example:
@@ -97,6 +85,14 @@ class InspectionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericV
     """
     serializer_class = InspectionSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [QSearchFilter, OrderingFilter]
+    search_fields = [
+        "inspection_type",
+        "action",
+        "grade",
+    ]
+    ordering_fields = ["inspection_date", "score", "grade", "restraunt__name", "restraunt__camis"]
 
     def get_queryset(self):
         qs = Inspection.objects.select_related("restraunt")

@@ -20,12 +20,14 @@ class RestrauntSerializer(serializers.ModelSerializer):
 
 
 class InspectionSerializer(serializers.ModelSerializer):
+    restraunt = serializers.SlugRelatedField(slug_field="camis", queryset=Restraunt.objects.all())
+    restraunt_detail = RestrauntSerializer(source="restraunt", read_only=True)
     violations = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     violations_create = serializers.ListField(child=serializers.DictField(), write_only=True, required=False)
 
     class Meta:
         model = Inspection
-        fields = ["id", "inspection_date", "inspection_type", "action", "score", "grade", "grade_date", "restraunt", "violations", "violations_create"]
+        fields = ["id", "inspection_date", "inspection_type", "action", "score", "grade", "grade_date", "restraunt", "restraunt_detail", "violations", "violations_create"]
 
     def create(self, validated_data):
         violations_data = validated_data.pop("violations_create", [])

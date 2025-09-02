@@ -31,11 +31,11 @@ class Inspection(models.Model):
         on_delete=models.CASCADE,
         related_name='inspections'
     )
-    inspection_date = models.DateField()
-    inspection_type = models.CharField(max_length=50)
-    action = models.CharField(max_length=255)
-    score = models.IntegerField(null=True, blank=True)
-    grade = models.CharField(max_length=2, null=True, blank=True)
+    inspection_date = models.DateField(db_index=True)
+    inspection_type = models.CharField(max_length=100)
+    action = models.TextField(null=True, blank=True)
+    score = models.PositiveSmallIntegerField(null=True, blank=True, db_index=True)
+    grade = models.CharField(max_length=2, null=True, blank=True, db_index=True)
     grade_date = models.DateField(null=True, blank=True)
 
     objects = models.Manager()
@@ -43,6 +43,9 @@ class Inspection(models.Model):
     class Meta:
         ordering = ['-inspection_date']
         get_latest_by = 'inspection_date'
+        indexes = [
+            models.Index(fields=['restraunt', 'inspection_date']),
+        ]
 
     def __str__(self):
         return f"{self.restraunt} @ {self.inspection_date}"
