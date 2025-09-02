@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../api";
 import ViolationSheet from "@/components/inspections/ViolationSheet";
 import AddInspectionSheet from "@/components/inspections/AddInspectionSheet";
-import { Input } from "@/components/ui/input";
+import DebouncedSearchInput from "@/components/search/DebouncedSearchInput";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -172,24 +172,13 @@ function Inspection() {
 
       {/* Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="flex-1">
-          <Input
-            type="text"
-            placeholder="Search inspections..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search inspections"
-          />
-        </div>
-        {search && (
-          <Button
-            variant="ghost"
-            onClick={() => setSearch("")}
-            className="self-end sm:self-auto"
-          >
-            Clear
-          </Button>
-        )}
+        <DebouncedSearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search inspections..."
+          ariaLabel="Search inspections"
+          className="w-full"
+        />
       </div>
 
       {/* Content */}

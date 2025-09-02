@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+
+import DebouncedSearchInput from "@/components/search/DebouncedSearchInput";
 import {
   Table,
   TableHeader,
@@ -112,24 +112,13 @@ function Home() {
 
       {/* Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="flex-1">
-          <Input
-            type="text"
-            placeholder="Search restaurants..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            aria-label="Search restaurants"
-          />
-        </div>
-        {search && (
-          <Button
-            variant="ghost"
-            onClick={() => setSearch("")}
-            className="self-end sm:self-auto"
-          >
-            Clear
-          </Button>
-        )}
+        <DebouncedSearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search restaurants..."
+          ariaLabel="Search restaurants"
+          className="w-full"
+        />
       </div>
 
       {/* Content */}
