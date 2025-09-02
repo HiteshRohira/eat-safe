@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api";
 import ViolationSheet from "@/components/inspections/ViolationSheet";
+import AddInspectionSheet from "@/components/inspections/AddInspectionSheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,8 @@ function Inspection() {
   const [totalCount, setTotalCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [searchParams] = useSearchParams();
   const camisFilter =
     searchParams.get("restraunt") || searchParams.get("camis") || "";
@@ -85,7 +88,7 @@ function Inspection() {
     return () => {
       isMounted = false;
     };
-  }, [search, camisFilter, currentPage]);
+  }, [search, camisFilter, currentPage, refreshKey]);
 
   const pageCount = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
@@ -113,34 +116,59 @@ function Inspection() {
         onOpenChange={setSheetOpen}
         inspection={selectedInspection}
       />
-      <div className="flex flex-col gap-2">
-        {inspections?.[0]?.restraunt_detail?.name ? (
-          <>
-            <h2 className="text-xl font-semibold tracking-tight">
-              Inspection for {inspections[0].restraunt_detail.name}
-            </h2>
-            {inspections?.[0]?.inspection_date && (
-              <p className="text-muted-foreground">
-                Last inspection at{" "}
-                {new Date(inspections[0].inspection_date).toLocaleDateString(
-                  undefined,
-                  { year: "numeric", month: "long", day: "numeric" },
+      <>
+        <AddInspectionSheet
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          presetCamis={
+            (searchParams.get("restraunt") || searchParams.get("camis")) ??
+            inspections?.[0]?.restraunt ??
+            inspections?.[0]?.restraunt_detail?.camis ??
+            ""
+          }
+          onCreated={() => {
+            setAddOpen(false);
+            setCurrentPage(1);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1">
+            {inspections?.[0]?.restraunt_detail?.name ? (
+              <>
+                <h2 className="text-xl font-semibold tracking-tight">
+                  Inspection for {inspections[0].restraunt_detail.name}
+                </h2>
+                {inspections?.[0]?.inspection_date && (
+                  <p className="text-muted-foreground">
+                    Last inspection at{" "}
+                    {new Date(
+                      inspections[0].inspection_date,
+                    ).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                    . Use search to filter by action or grade
+                  </p>
                 )}
-                . Use search to filter by action or grade
-              </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  Inspections
+                </h1>
+                <p className="text-muted-foreground">
+                  {`Browse inspections. Use search to filter by action or grade`}
+                </p>
+              </>
             )}
-          </>
-        ) : (
-          <>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Inspections
-            </h1>
-            <p className="text-muted-foreground">
-              {`Browse inspections. Use search to filter by action or grade`}
-            </p>
-          </>
-        )}
-      </div>
+          </div>
+          <div className="mt-2 sm:mt-0">
+            <Button onClick={() => setAddOpen(true)}>Add Inspection</Button>
+          </div>
+        </div>
+      </>
 
       {/* Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
