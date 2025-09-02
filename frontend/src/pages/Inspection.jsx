@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+import ViolationSheet from "@/components/inspections/ViolationSheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,9 +32,6 @@ function Inspection() {
   const [totalCount, setTotalCount] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState(null);
-  const [violations, setViolations] = useState([]);
-  const [violationsLoading, setViolationsLoading] = useState(false);
-  const [violationsError, setViolationsError] = useState("");
   const [searchParams] = useSearchParams();
   const camisFilter =
     searchParams.get("restraunt") || searchParams.get("camis") || "";
@@ -118,56 +108,11 @@ function Inspection() {
 
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-6 space-y-6">
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="sm:max-w-xl">
-          <SheetHeader>
-            <SheetTitle>Violations</SheetTitle>
-            <SheetDescription>
-              {selectedInspection?.inspection_date
-                ? `Inspection on ${new Date(selectedInspection.inspection_date).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}`
-                : ""}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="px-4 pb-4">
-            {violationsLoading ? (
-              <div className="text-muted-foreground">Loading violations...</div>
-            ) : violationsError ? (
-              <div className="text-destructive">{violationsError}</div>
-            ) : violations.length === 0 ? (
-              <div className="text-muted-foreground">
-                No violations for this inspection.
-              </div>
-            ) : (
-              <Table className="[&_th]:bg-muted/30 [&_th]:font-semibold">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Critical</TableHead>
-                    <TableHead>Description</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {violations.map((v) => (
-                    <TableRow key={v.id}>
-                      <TableCell className="tabular-nums">
-                        {v?.code || "-"}
-                      </TableCell>
-                      <TableCell>{v?.critical_flag || "-"}</TableCell>
-                      <TableCell
-                        className="max-w-[360px] whitespace-normal"
-                        title={v?.description || ""}
-                      >
-                        {v?.description || "-"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
-          <SheetFooter />
-        </SheetContent>
-      </Sheet>
+      <ViolationSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        inspection={selectedInspection}
+      />
       <div className="flex flex-col gap-2">
         {inspections?.[0]?.restraunt_detail?.name ? (
           <>
@@ -253,27 +198,6 @@ function Inspection() {
                       onClick={() => {
                         setSelectedInspection(r);
                         setSheetOpen(true);
-                        (async () => {
-                          try {
-                            setViolationsLoading(true);
-                            setViolationsError("");
-                            const res = await api.get("/api/violations/", {
-                              params: { inspection: r.id },
-                            });
-                            const data = Array.isArray(res?.data)
-                              ? res.data
-                              : Array.isArray(res?.data?.results)
-                                ? res.data.results
-                                : [];
-                            setViolations(data);
-                          } catch (e) {
-                            setViolationsError(
-                              e?.message || "Failed to load violations.",
-                            );
-                          } finally {
-                            setViolationsLoading(false);
-                          }
-                        })();
                       }}
                     >
                       <TableCell className="tabular-nums">
