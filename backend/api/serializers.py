@@ -17,7 +17,7 @@ class RestrauntSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restraunt
         fields = ["camis", "name", "boro", "building", "street", "zipcode", "phone", "cuisine"]
-        extra_kwargs = {"camis": {"read_only": True}}
+
 
 class InspectionSerializer(serializers.ModelSerializer):
     violations = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
