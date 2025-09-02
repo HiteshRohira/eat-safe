@@ -35,6 +35,8 @@ function Inspection() {
   const [selectedInspection, setSelectedInspection] = useState(null);
   const [addOpen, setAddOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [latestInspection, setLatestInspection] = useState(null);
+  const [latestError, setLatestError] = useState("");
   const [searchParams] = useSearchParams();
   const camisFilter =
     searchParams.get("restraunt") || searchParams.get("camis") || "";
@@ -90,6 +92,36 @@ function Inspection() {
     };
   }, [search, camisFilter, currentPage, refreshKey]);
 
+  // Fetch latest inspection for header (independent of search)
+  useEffect(() => {
+    let isMounted = true;
+    const fetchLatest = async () => {
+      try {
+        setLatestError("");
+        const params = { page: 1, page_size: 1, ordering: "-inspection_date" };
+        if (camisFilter) params.restraunt = camisFilter;
+        const res = await api.get("/api/inspections/", { params });
+        if (!isMounted) return;
+
+        const data = res?.data;
+        const results = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.results)
+            ? data.results
+            : [];
+        setLatestInspection(results[0] || null);
+      } catch (e) {
+        if (!isMounted) return;
+        setLatestInspection(null);
+        setLatestError(e?.message || "Failed to load latest inspection.");
+      }
+    };
+    fetchLatest();
+    return () => {
+      isMounted = false;
+    };
+  }, [camisFilter, refreshKey]);
+
   const pageCount = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
 
   // Reset to page 1 on new search
@@ -122,8 +154,8 @@ function Inspection() {
           onOpenChange={setAddOpen}
           presetCamis={
             (searchParams.get("restraunt") || searchParams.get("camis")) ??
-            inspections?.[0]?.restraunt ??
-            inspections?.[0]?.restraunt_detail?.camis ??
+            latestInspection?.restraunt ??
+            latestInspection?.restraunt_detail?.camis ??
             ""
           }
           onCreated={() => {
@@ -134,16 +166,21 @@ function Inspection() {
         />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
-            {inspections?.[0]?.restraunt_detail?.name ? (
+            {latestInspection?.restraunt_detail?.name ||
+            inspections?.[0]?.restraunt_detail?.name ? (
               <>
                 <h2 className="text-xl font-semibold tracking-tight">
-                  Inspection for {inspections[0].restraunt_detail.name}
+                  Inspection for{" "}
+                  {latestInspection?.restraunt_detail?.name ||
+                    inspections?.[0]?.restraunt_detail?.name}
                 </h2>
-                {inspections?.[0]?.inspection_date && (
+                {(latestInspection?.inspection_date ||
+                  inspections?.[0]?.inspection_date) && (
                   <p className="text-muted-foreground">
                     Last inspection at{" "}
                     {new Date(
-                      inspections[0].inspection_date,
+                      latestInspection?.inspection_date ||
+                        inspections?.[0]?.inspection_date,
                     ).toLocaleDateString(undefined, {
                       year: "numeric",
                       month: "long",
