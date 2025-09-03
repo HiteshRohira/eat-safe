@@ -2,7 +2,11 @@ from rest_framework import mixins, permissions, generics
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.contrib.auth.models import User
+from django.db.models import Count, Sum, Q, IntegerField, Case, When
+from django.utils.dateparse import parse_date
 
 from .models import Restraunt, Inspection, Violation
 from .serializers import (
@@ -131,3 +135,132 @@ class ViolationViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericVi
         if inspection_id:
             qs = qs.filter(inspection_id=inspection_id)
         return qs
+
+
+class ViolationsTimelineAPIView(APIView):
+    """
+    GET /api/charts/violations-timeline/?restraunt=<CAMIS>&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=50
+    Returns per-inspection violation counts (by criticality) for a single restaurant.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        camis = request.query_params.get("restraunt") or request.query_params.get("camis")
+        if not camis:
+            return Response({"detail": "Query parameter 'restraunt' (CAMIS) is required."}, status=400)
+
+        qs = Inspection.objects.filter(restraunt=camis)
+
+        # Optional date range
+        from_str = request.query_params.get("from")
+        to_str = request.query_params.get("to")
+        if from_str:
+            d = parse_date(from_str)
+            if d:
+                qs = qs.filter(inspection_date__gte=d)
+        if to_str:
+            d = parse_date(to_str)
+            if d:
+                qs = qs.filter(inspection_date__lte=d)
+
+        # Ordering and limit
+        ordering = request.query_params.get("ordering") or "-inspection_date"
+        if ordering not in ("inspection_date", "-inspection_date"):
+            ordering = "-inspection_date"
+        try:
+            limit = int(request.query_params.get("limit", 50))
+        except Exception:
+            limit = 50
+        limit = max(1, min(limit, 365))
+
+        qs = qs.order_by(ordering)
+
+        annotated = qs.annotate(
+            violations_total=Count("violations"),
+            violations_critical=Sum(
+                Case(
+                    When(violations__critical_flag="Critical", then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            violations_not_critical=Sum(
+                Case(
+                    When(violations__critical_flag="Not Critical", then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            violations_not_applicable=Sum(
+                Case(
+                    When(violations__critical_flag="Not Applicable", then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+        )[:limit]
+
+        data = list(
+            annotated.values(
+                "id",
+                "inspection_date",
+                "score",
+                "grade",
+                "violations_total",
+                "violations_critical",
+                "violations_not_critical",
+                "violations_not_applicable",
+            )
+        )
+        # Normalize None sums to 0
+        for row in data:
+            row["violations_total"] = row.get("violations_total") or 0
+            row["violations_critical"] = row.get("violations_critical") or 0
+            row["violations_not_critical"] = row.get("violations_not_critical") or 0
+            row["violations_not_applicable"] = row.get("violations_not_applicable") or 0
+            row["inspection_id"] = row.pop("id", None)
+        return Response(data)
+
+
+class ScoreTimelineAPIView(APIView):
+    """
+    GET /api/charts/score-timeline/?restraunt=<CAMIS>&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=50
+    Returns per-inspection score and grade for a single restaurant.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        camis = request.query_params.get("restraunt") or request.query_params.get("camis")
+        if not camis:
+            return Response({"detail": "Query parameter 'restraunt' (CAMIS) is required."}, status=400)
+
+        qs = Inspection.objects.filter(restraunt=camis)
+
+        # Optional date range
+        from_str = request.query_params.get("from")
+        to_str = request.query_params.get("to")
+        if from_str:
+            d = parse_date(from_str)
+            if d:
+                qs = qs.filter(inspection_date__gte=d)
+        if to_str:
+            d = parse_date(to_str)
+            if d:
+                qs = qs.filter(inspection_date__lte=d)
+
+        # Ordering and limit
+        ordering = request.query_params.get("ordering") or "-inspection_date"
+        if ordering not in ("inspection_date", "-inspection_date"):
+            ordering = "-inspection_date"
+        try:
+            limit = int(request.query_params.get("limit", 50))
+        except Exception:
+            limit = 50
+        limit = max(1, min(limit, 365))
+
+        qs = qs.order_by(ordering)[:limit]
+
+        data = list(qs.values("id", "inspection_date", "score", "grade"))
+        for row in data:
+            row["inspection_id"] = row.pop("id", None)
+        return Response(data)

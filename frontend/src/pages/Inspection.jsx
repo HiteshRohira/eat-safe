@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../api";
 import ViolationSheet from "@/components/inspections/ViolationSheet";
 import AddInspectionSheet from "@/components/inspections/AddInspectionSheet";
+import InspectionVisualisation from "@/components/inspections/InspectionVisualisation";
 import DebouncedSearchInput from "@/components/search/DebouncedSearchInput";
 import { Button } from "@/components/ui/button";
 import {
@@ -203,6 +204,7 @@ function Inspection() {
             <Button onClick={() => setAddOpen(true)}>Add Inspection</Button>
           </div>
         </div>
+        <InspectionVisualisation camis={camisFilter} />
       </>
 
       {/* Search */}

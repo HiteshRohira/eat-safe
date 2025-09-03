@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from api.views import RestrauntViewSet, InspectionViewSet, ViolationViewSet, CreateUserView
+from api.views import RestrauntViewSet, InspectionViewSet, ViolationViewSet, CreateUserView, ViolationsTimelineAPIView, ScoreTimelineAPIView
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -15,5 +15,7 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
+    path("api/charts/violations-timeline/", ViolationsTimelineAPIView.as_view(), name="charts-violations-timeline"),
+    path("api/charts/score-timeline/", ScoreTimelineAPIView.as_view(), name="charts-score-timeline"),
     path("api-auth/", include("rest_framework.urls")),
 ]
