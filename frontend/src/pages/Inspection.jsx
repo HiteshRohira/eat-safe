@@ -207,6 +207,8 @@ function Inspection() {
         <InspectionVisualisation camis={camisFilter} />
       </>
 
+      <Separator />
+
       {/* Search */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <DebouncedSearchInput

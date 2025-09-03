@@ -35,7 +35,7 @@ export function LineDots({
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent className={"flex items-end"}>
-        <ChartContainer config={config} height={360} className={"px-0"}>
+        <ChartContainer config={config} height={320} className={"px-0 w-full"}>
           <LineChart
             accessibilityLayer
             data={data}
