@@ -16,10 +16,9 @@ function formatShortDateLabel(iso) {
   // Expecting "YYYY-MM-DD"
   const d = iso ? new Date(iso) : null;
   if (!d || isNaN(d.getTime())) return iso || "";
-  return d.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${mm}/${dd}`;
 }
 
 function byAscDate(a, b) {
@@ -139,10 +138,6 @@ export default function InspectionVisualisation({
       label: "Not Critical",
       color: "var(--chart-2)",
     },
-    notApplicable: {
-      label: "Not Applicable",
-      color: "var(--chart-3)",
-    },
   };
 
   const scoreChartConfig = {
@@ -195,7 +190,7 @@ export default function InspectionVisualisation({
             <div className="text-destructive text-sm">{violationsError}</div>
           </CardContent>
         </Card>
-      ) : areaChartData.length === 0 ? (
+      ) : areaChartData.length < 3 ? (
         <Card>
           <CardHeader>
             <CardTitle>Violations over time</CardTitle>
@@ -204,8 +199,8 @@ export default function InspectionVisualisation({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-muted-foreground text-sm">
-              No violations found for this restaurant.
+            <div className="text-muted-foreground text-sm flex h-48 items-center justify-center">
+              Not enough data to visualize
             </div>
           </CardContent>
         </Card>
@@ -214,7 +209,7 @@ export default function InspectionVisualisation({
           data={areaChartData}
           config={violationsChartConfig}
           xKey="label"
-          areaKeys={["notApplicable", "notCritical", "critical"]}
+          areaKeys={["notCritical", "critical"]}
           title="Violations over time"
           description="Stacked by criticality; shows counts per inspection date."
         />
@@ -246,7 +241,7 @@ export default function InspectionVisualisation({
             <div className="text-destructive text-sm">{scoreError}</div>
           </CardContent>
         </Card>
-      ) : lineChartData.length === 0 ? (
+      ) : lineChartData.length < 3 ? (
         <Card>
           <CardHeader>
             <CardTitle>Score trend</CardTitle>
@@ -255,8 +250,8 @@ export default function InspectionVisualisation({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-muted-foreground text-sm">
-              No scores found for this restaurant.
+            <div className="text-muted-foreground text-sm flex h-48 items-center justify-center">
+              Not enough data to visualize
             </div>
           </CardContent>
         </Card>

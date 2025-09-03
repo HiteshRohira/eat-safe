@@ -29,10 +29,7 @@ export function AreaStacked({
     Array.isArray(areaKeys) && areaKeys.length
       ? areaKeys
       : Object.keys(config || {});
-  const fmt =
-    xTickFormatter ||
-    ((value) =>
-      typeof value === "string" && value.slice ? value.slice(0, 3) : value);
+  const fmt = xTickFormatter || ((value) => value);
 
   return (
     <Card>

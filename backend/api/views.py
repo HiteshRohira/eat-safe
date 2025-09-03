@@ -149,7 +149,7 @@ class ViolationsTimelineAPIView(APIView):
         if not camis:
             return Response({"detail": "Query parameter 'restraunt' (CAMIS) is required."}, status=400)
 
-        qs = Inspection.objects.filter(restraunt=camis)
+        qs = Inspection.objects.filter(restraunt=camis, score__isnull=False)
 
         # Optional date range
         from_str = request.query_params.get("from")
@@ -176,7 +176,6 @@ class ViolationsTimelineAPIView(APIView):
         qs = qs.order_by(ordering)
 
         annotated = qs.annotate(
-            violations_total=Count("violations"),
             violations_critical=Sum(
                 Case(
                     When(violations__critical_flag="Critical", then=1),
@@ -191,13 +190,6 @@ class ViolationsTimelineAPIView(APIView):
                     output_field=IntegerField(),
                 )
             ),
-            violations_not_applicable=Sum(
-                Case(
-                    When(violations__critical_flag="Not Applicable", then=1),
-                    default=0,
-                    output_field=IntegerField(),
-                )
-            ),
         )[:limit]
 
         data = list(
@@ -206,18 +198,15 @@ class ViolationsTimelineAPIView(APIView):
                 "inspection_date",
                 "score",
                 "grade",
-                "violations_total",
                 "violations_critical",
                 "violations_not_critical",
-                "violations_not_applicable",
             )
         )
-        # Normalize None sums to 0
+        # Normalize None sums to 0 and compute total (excluding Not Applicable)
         for row in data:
-            row["violations_total"] = row.get("violations_total") or 0
             row["violations_critical"] = row.get("violations_critical") or 0
             row["violations_not_critical"] = row.get("violations_not_critical") or 0
-            row["violations_not_applicable"] = row.get("violations_not_applicable") or 0
+            row["violations_total"] = row["violations_critical"] + row["violations_not_critical"]
             row["inspection_id"] = row.pop("id", None)
         return Response(data)
 
@@ -234,7 +223,7 @@ class ScoreTimelineAPIView(APIView):
         if not camis:
             return Response({"detail": "Query parameter 'restraunt' (CAMIS) is required."}, status=400)
 
-        qs = Inspection.objects.filter(restraunt=camis)
+        qs = Inspection.objects.filter(restraunt=camis, score__isnull=False)
 
         # Optional date range
         from_str = request.query_params.get("from")

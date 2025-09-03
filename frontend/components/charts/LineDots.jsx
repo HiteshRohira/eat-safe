@@ -25,10 +25,7 @@ export function LineDots({
   xTickFormatter,
   strokeKey,
 }) {
-  const fmt =
-    xTickFormatter ||
-    ((value) =>
-      typeof value === "string" && value.slice ? value.slice(0, 3) : value);
+  const fmt = xTickFormatter || ((value) => value);
   const colorKey = strokeKey || yKey;
 
   return (
