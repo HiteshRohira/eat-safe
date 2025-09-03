@@ -190,7 +190,7 @@ export default function InspectionVisualisation({
             <div className="text-destructive text-sm">{violationsError}</div>
           </CardContent>
         </Card>
-      ) : areaChartData.length < 3 ? (
+      ) : areaChartData.length < 2 ? (
         <Card>
           <CardHeader>
             <CardTitle>Violations over time</CardTitle>
@@ -219,9 +219,7 @@ export default function InspectionVisualisation({
         <Card>
           <CardHeader>
             <CardTitle>Score trend</CardTitle>
-            <CardDescription>
-              Lower is better. Dots are colored by the series color.
-            </CardDescription>
+            <CardDescription>Lower is better.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-muted-foreground text-sm">
@@ -233,21 +231,17 @@ export default function InspectionVisualisation({
         <Card>
           <CardHeader>
             <CardTitle>Score trend</CardTitle>
-            <CardDescription>
-              Lower is better. Dots are colored by the series color.
-            </CardDescription>
+            <CardDescription>Lower is better.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-destructive text-sm">{scoreError}</div>
           </CardContent>
         </Card>
-      ) : lineChartData.length < 3 ? (
+      ) : lineChartData.length < 2 ? (
         <Card>
           <CardHeader>
             <CardTitle>Score trend</CardTitle>
-            <CardDescription>
-              Lower is better. Dots are colored by the series color.
-            </CardDescription>
+            <CardDescription>Lower is better.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-muted-foreground text-sm flex h-48 items-center justify-center">
@@ -263,7 +257,7 @@ export default function InspectionVisualisation({
           yKey="score"
           strokeKey="score"
           title="Score trend"
-          description="Lower is better. Dots are colored by the series color."
+          description="Lower is better."
         />
       )}
     </div>
