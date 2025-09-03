@@ -37,8 +37,8 @@ export function AreaStacked({
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={config}>
+      <CardContent className={"flex items-end"}>
+        <ChartContainer config={config} height={360} className={"px-0"}>
           <AreaChart
             accessibilityLayer
             data={data}
@@ -51,6 +51,8 @@ export function AreaStacked({
               axisLine={false}
               tickMargin={8}
               tickFormatter={fmt}
+              padding={{ left: 24, right: 24 }}
+              interval="preserveStartEnd"
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
             <defs>

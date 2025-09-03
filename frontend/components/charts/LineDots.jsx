@@ -34,8 +34,8 @@ export function LineDots({
         <CardTitle>{title}</CardTitle>
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={config}>
+      <CardContent className={"flex items-end"}>
+        <ChartContainer config={config} height={360} className={"px-0"}>
           <LineChart
             accessibilityLayer
             data={data}
@@ -48,6 +48,8 @@ export function LineDots({
               axisLine={false}
               tickMargin={8}
               tickFormatter={fmt}
+              padding={{ left: 24, right: 24 }}
+              interval="preserveStartEnd"
             />
             <ChartTooltip
               cursor={false}
