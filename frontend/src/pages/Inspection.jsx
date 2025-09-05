@@ -168,7 +168,7 @@ function Inspection() {
             {latestInspection?.restraunt_detail?.name ||
             inspections?.[0]?.restraunt_detail?.name ? (
               <>
-                <h2 className="text-xl font-semibold tracking-tight">
+                <h2 className="text-xl font-medium tracking-tight">
                   Inspection for{" "}
                   {latestInspection?.restraunt_detail?.name ||
                     inspections?.[0]?.restraunt_detail?.name}
@@ -191,7 +191,7 @@ function Inspection() {
               </>
             ) : (
               <>
-                <h1 className="text-2xl font-semibold tracking-tight">
+                <h1 className="text-2xl font-medium tracking-tight">
                   Inspections
                 </h1>
                 <p className="text-muted-foreground">
@@ -201,7 +201,9 @@ function Inspection() {
             )}
           </div>
           <div className="mt-2 sm:mt-0">
-            <Button onClick={() => setAddOpen(true)}>Add Inspection</Button>
+            <Button variant={"secondary"} onClick={() => setAddOpen(true)}>
+              Add Inspection
+            </Button>
           </div>
         </div>
         <InspectionVisualisation camis={camisFilter} />
