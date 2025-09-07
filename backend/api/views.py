@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from django.db.models import Count, Sum, Q, IntegerField, Case, When
+from django.db.models import Sum, IntegerField, Case, When
 from django.utils.dateparse import parse_date
 
 from .models import Restraunt, Inspection, Violation
@@ -44,17 +44,13 @@ class RestrauntViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericVi
       - page_size=<n>                     -> items per page (default 10)
       - ordering=<field>                  -> e.g., name, -name
     """
+    queryset = Restraunt.objects.all().order_by("name")
     serializer_class = RestrauntSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
     filter_backends = [QSearchFilter, OrderingFilter]
     search_fields = ["name", "cuisine", "boro", "zipcode", "camis", "phone", "street", "building"]
     ordering_fields = ["name", "boro", "cuisine", "zipcode", "camis"]
-
-    def get_queryset(self):
-        qs = Restraunt.objects.all().order_by("name")
-
-        return qs
 
 
 class InspectionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericViewSet):
@@ -104,7 +100,6 @@ class InspectionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, GenericV
         camis_param = self.request.query_params.get("camis")
         camis = restraunt_param or camis_param
         if camis:
-            # FK points to Restraunt primary key (camis), so direct filter works
             qs = qs.filter(restraunt=camis)
         return qs
 
@@ -145,23 +140,11 @@ class ViolationsTimelineAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        camis = request.query_params.get("restraunt") or request.query_params.get("camis")
+        camis = request.query_params.get("camis")
         if not camis:
-            return Response({"detail": "Query parameter 'restraunt' (CAMIS) is required."}, status=400)
+            return Response({"detail": "Query parameter 'restaurant' (CAMIS) is required."}, status=400)
 
-        qs = Inspection.objects.filter(restraunt=camis, score__isnull=False)
-
-        # Optional date range
-        from_str = request.query_params.get("from")
-        to_str = request.query_params.get("to")
-        if from_str:
-            d = parse_date(from_str)
-            if d:
-                qs = qs.filter(inspection_date__gte=d)
-        if to_str:
-            d = parse_date(to_str)
-            if d:
-                qs = qs.filter(inspection_date__lte=d)
+        qs = Inspection.objects.filter(restraunt=camis)
 
         # Ordering and limit
         ordering = request.query_params.get("ordering") or "-inspection_date"

@@ -56,7 +56,7 @@ export default function InspectionVisualisation({
         setViolationsLoading(true);
         setViolationsError("");
         const res = await api.get("/api/charts/violations-timeline/", {
-          params: { restraunt: camis, limit },
+          params: { camis, limit },
         });
         if (cancelled) return;
         const arr = Array.isArray(res?.data) ? res.data : [];
