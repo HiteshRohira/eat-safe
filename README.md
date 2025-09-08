@@ -56,3 +56,42 @@ Backend
 - JWT auth (SimpleJWT)
 - Start:
   - `python manage.py runserver`
+
+## Architecture overview and ER diagram
+
+- Entities:
+  - Restraunt: CAMIS (PK), name, boro, building, street, zipcode, phone, cuisine
+  - Inspection: id (PK), restraunt (FK to Restraunt.camis), inspection_date, inspection_type, action, score, grade, grade_date
+  - Violation: id (PK), inspection (FK to Inspection.id), code, description, critical_flag
+
+- Relationships:
+  - Restraunt 1 — N Inspection
+  - Inspection 1 — N Violation
+
+- ER (text):
+  Restraunt(camis) <1—N> Inspection(id) <1—N> Violation(id)
+
+## API endpoints
+
+Base prefix: `/api`
+
+- Auth
+  - POST `/api/token/` — obtain JWT
+  - POST `/api/token/refresh/` — refresh JWT
+  - POST `/api/user/register/` — register a user
+
+- Restaurants
+  - GET `/api/restraunts/` — list (q, page, page_size, ordering)
+  - POST `/api/restraunts/` — create
+
+- Inspections
+  - GET `/api/inspections/` — list (q, page, page_size, ordering, restraunt or camis)
+  - POST `/api/inspections/` — create
+
+- Violations
+  - GET `/api/violations/` — list (inspection)
+  - POST `/api/violations/` — create
+
+- Charts
+  - GET `/api/charts/violations-timeline/?restraunt=<CAMIS>&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=50`
+  - GET `/api/charts/score-timeline/?restraunt=<CAMIS>&from=YYYY-MM-DD&to=YYYY-MM-DD&limit=50`
