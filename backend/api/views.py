@@ -158,6 +158,7 @@ class ViolationsTimelineAPIView(APIView):
 
         qs = qs.order_by(ordering)
 
+        # Annotating values from violations table and adding them up
         annotated = qs.annotate(
             violations_critical=Sum(
                 Case(
