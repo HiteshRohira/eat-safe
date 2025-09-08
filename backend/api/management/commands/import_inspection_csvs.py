@@ -37,7 +37,7 @@ class Command(BaseCommand):
     help = "Import inspection CSVs (restaurants, inspections, violations) into the database using the ORM."
 
     def add_arguments(self, parser):
-        default_base = Path(settings.BASE_DIR).parent / "inspection-data" / "out_small"
+        default_base = Path(settings.BASE_DIR).parent / "inspection-data" / "out"
         parser.add_argument(
             "--base-dir",
             type=Path,
