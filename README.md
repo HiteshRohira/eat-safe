@@ -11,7 +11,7 @@ The official dataset is comprehensive but not always easy to browse for everyday
 
 ## Data Source
 
-- NYC Open Data: DOHMH New York City Restaurant Inspection Results  
+- NYC Open Data: DOHMH New York City Restaurant Inspection Results
   https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j/data_preview
 
 ## How the data becomes 3 CSVs and then 3 tables
@@ -27,9 +27,9 @@ Scripts involved:
 - Import into DB (via Django ORM): `backend/api/management/commands/import_inspection_csvs.py`
 
 Typical flow:
-1) From the `inspection-data` directory, run the extractor with your input file and write to `out_small` so it matches the backend import default:
+1) From the `inspection-data` directory, run the extractor with your input file and write to `out` so it matches the backend import default:
    - Example:
-     - `python extract_filtered_csv.py --input DOHMH_New_York_City_Restaurant_Inspection_Results_YYYYMMDD.csv --output-dir ./out_small`
+     - `python extract_filtered_csv.py --input DOHMH_New_York_City_Restaurant_Inspection_Results_YYYYMMDD.csv --output-dir ./out`
    - Notes:
      - Defaults filter to 2023-01-01 through today (change with `--start-date`/`--end-date`)
      - Supports extra flags (e.g., `--ascii`) to sanitize text if needed
@@ -37,7 +37,7 @@ Typical flow:
 2) From the `backend` directory, run the Django management command to import the three CSVs into the database tables:
    - Example:
      - `python manage.py import_inspection_csvs`
-     - By default, it reads from `../inspection-data/out_small`
+     - By default, it reads from `../inspection-data/out`
      - You can also specify a different folder:
        - `python manage.py import_inspection_csvs --base-dir ../inspection-data/out`
 
@@ -56,4 +56,3 @@ Backend
 - JWT auth (SimpleJWT)
 - Start:
   - `python manage.py runserver`
-
