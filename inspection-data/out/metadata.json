@@ -1,0 +1,13 @@
+{
+  "input_rows_scanned": 289847,
+  "input_rows_limited": false,
+  "rows_date_filtered_out": 68249,
+  "rows_boro_filtered_out": 0,
+  "restaurants_written": 500,
+  "inspections_written": 1000,
+  "violations_written": 2000,
+  "input_path": "/Users/hitesh/projects/capstone/inspection-data/DOHMH_New_York_City_Restaurant_Inspection_Results_20250902.csv",
+  "start_date": "2023-01-01",
+  "end_date": "2025-09-02",
+  "output_dir": "/Users/hitesh/projects/capstone/inspection-data/out_small"
+}

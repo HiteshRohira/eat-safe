@@ -1,7 +1,7 @@
 env/
 **/*.env
 .DS_Store
-inspection-data/
+inspection-data/DOHMH_New_York_City_Restaurant_Inspection_Results_20250902.csv
 
 # Python
 __pycache__/

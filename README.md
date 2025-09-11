@@ -16,7 +16,7 @@ The official dataset is comprehensive but not always easy to browse for everyday
 
 ## How the data becomes 3 CSVs and then 3 tables
 
-We use a streaming ETL script to filter and normalize the raw CSV and split it into three CSV files that align with our backend data model:
+I used a python script to filter and normalize the raw CSV and split it into three CSV files that align with our backend data model:
 
 - `restaurants.csv` (one row per restaurant)
 - `inspections.csv` (one row per inspection event, linked to a restaurant)
@@ -56,6 +56,15 @@ Backend
 - JWT auth (SimpleJWT)
 - Start:
   - `python manage.py runserver`
+
+## Showcase Images
+
+![](showcase-screenshots/eatsafe-login.png)
+![](showcase-screenshots/eatsafe-register.png)
+![](showcase-screenshots/eatsafe-restraunts.png)
+![](showcase-screenshots/eatsafe-inspections.png)
+![](showcase-screenshots/eatsafe-violations.png)
+![](showcase-screenshots/eatsafe-add-inspections.png)
 
 ## Architecture overview and ER diagram
 
